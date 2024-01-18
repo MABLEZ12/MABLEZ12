@@ -1,0 +1,73 @@
+import pygame
+import sys
+
+# Initialisation de Pygame
+pygame.init()
+
+# Paramètres du jeu
+largeur_fenetre = 800
+hauteur_fenetre = 600
+
+# Couleurs
+blanc = (255, 255, 255)
+noir = (0, 0, 0)
+
+# Initialisation de la fenêtre
+fenetre = pygame.display.set_mode((largeur_fenetre, hauteur_fenetre))
+pygame.display.set_caption("Jeu de Ping Pong")
+
+# Initialisation des raquettes
+raquette_largeur = 15
+raquette_hauteur = 100
+
+raquette_joueur = pygame.Rect(50, hauteur_fenetre // 2 - raquette_hauteur // 2, raquette_largeur, raquette_hauteur)
+raquette_adversaire = pygame.Rect(largeur_fenetre - 50 - raquette_largeur, hauteur_fenetre // 2 - raquette_hauteur // 2, raquette_largeur, raquette_hauteur)
+
+# Initialisation de la balle
+balle_taille = 20
+balle = pygame.Rect(largeur_fenetre // 2 - balle_taille // 2, hauteur_fenetre // 2 - balle_taille // 2, balle_taille, balle_taille)
+balle_vitesse = [5, 5]  # [vitesse_x, vitesse_y]
+
+# Boucle principale du jeu
+while True:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+
+    # Mouvement de la raquette du joueur
+    touches = pygame.key.get_pressed()
+    if touches[pygame.K_UP] and raquette_joueur.top > 0:
+        raquette_joueur.y -= 5
+    if touches[pygame.K_DOWN] and raquette_joueur.bottom < hauteur_fenetre:
+        raquette_joueur.y += 5
+
+    # Mouvement de la balle
+    balle.x += balle_vitesse[0]
+    balle.y += balle_vitesse[1]
+
+    # Rebondissement de la balle sur les bords
+    if balle.top <= 0 or balle.bottom >= hauteur_fenetre:
+        balle_vitesse[1] = -balle_vitesse[1]
+
+    # Rebondissement de la balle sur les raquettes
+    if balle.colliderect(raquette_joueur) or balle.colliderect(raquette_adversaire):
+        balle_vitesse[0] = -balle_vitesse[0]
+
+    # Mouvement de la raquette de l'adversaire
+    if raquette_adversaire.centery < balle.centery and raquette_adversaire.bottom < hauteur_fenetre:
+        raquette_adversaire.y += 5
+    elif raquette_adversaire.centery > balle.centery and raquette_adversaire.top > 0:
+        raquette_adversaire.y -= 5
+
+    # Dessin des éléments
+    fenetre.fill(noir)
+    pygame.draw.rect(fenetre, blanc, raquette_joueur)
+    pygame.draw.rect(fenetre, blanc, raquette_adversaire)
+    pygame.draw.ellipse(fenetre, blanc, balle)
+
+    # Rafraîchissement de l'affichage
+    pygame.display.flip()
+
+    # Limite de la vitesse du jeu
+    pygame.time.Clock().tick(60)
